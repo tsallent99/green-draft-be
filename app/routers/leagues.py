@@ -44,6 +44,14 @@ def create_league(
     db.commit()
     db.refresh(db_league)
 
+    # Create entry for the league creator
+    creator_entry = Entry(
+        user_id=current_user.id,
+        league_id=db_league.id,
+        payment_status=PaymentStatus.PAID
+    )
+    db.add(creator_entry)
+
     # Create leaderboard for the league
     leaderboard = Leaderboard(league_id=db_league.id)
     db.add(leaderboard)
@@ -128,7 +136,7 @@ def join_league(
     entry = Entry(
         user_id=current_user.id,
         league_id=league.id,
-        payment_status=PaymentStatus.PENDING
+        payment_status=PaymentStatus.PAID
     )
     db.add(entry)
     db.commit()

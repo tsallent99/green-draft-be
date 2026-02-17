@@ -123,6 +123,12 @@ def get_mock_tournaments():
     return MOCK_TOURNAMENTS
 
 
+def get_mock_future_tournaments():
+    """Get tournaments that haven't started yet (start_date > now)"""
+    now = datetime.utcnow()
+    return [t for t in MOCK_TOURNAMENTS if t["start_date"] > now]
+
+
 def get_mock_tournament(tournament_id: int):
     """Get a specific mock tournament"""
     for tournament in MOCK_TOURNAMENTS:
