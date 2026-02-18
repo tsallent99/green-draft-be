@@ -21,6 +21,7 @@ class EntryUpdate(BaseModel):
 class EntryResponse(EntryBase):
     id: int
     payment_status: PaymentStatus
+    amount_paid: float
     total_score: float
     created_at: datetime
     updated_at: datetime
