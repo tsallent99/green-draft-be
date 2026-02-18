@@ -19,9 +19,9 @@ class Leaderboard(Base):
     # Relationships
     league = relationship("League", back_populates="leaderboard")
 
-    def calculate_prizes(self, num_entries, entry_fee):
-        """Calculate prize distribution"""
-        self.prize_pool = num_entries * entry_fee
-        self.first_place_prize = self.prize_pool * 0.60
-        self.second_place_prize = self.prize_pool * 0.30
-        self.third_place_prize = self.prize_pool * 0.10
+    def calculate_prizes(self, entries):
+        """Calculate prize distribution based on actual amounts received after Stripe fees"""
+        self.prize_pool = round(sum(e.amount_paid for e in entries), 2)
+        self.first_place_prize = round(self.prize_pool * 0.60, 2)
+        self.second_place_prize = round(self.prize_pool * 0.30, 2)
+        self.third_place_prize = round(self.prize_pool * 0.10, 2)

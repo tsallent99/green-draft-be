@@ -4,14 +4,15 @@ from typing import List
 from app.database import get_db
 from app.models import League, User, Entry, Leaderboard
 from app.models.entry import PaymentStatus
-from app.schemas import LeagueCreate, LeagueResponse, LeagueJoin, EntryResponse
+from app.schemas import LeagueCreate, LeagueResponse, LeagueJoin, EntryResponse, LeagueCreateResponse, LeagueJoinResponse
 from app.auth import get_current_user
 from app.mock_data import get_mock_tournament
+from app.services.stripe_service import create_checkout_session
 
 router = APIRouter(prefix="/leagues", tags=["leagues"])
 
 
-@router.post("", response_model=LeagueResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=LeagueCreateResponse, status_code=status.HTTP_201_CREATED)
 def create_league(
     league: LeagueCreate,
     current_user: User = Depends(get_current_user),
@@ -44,11 +45,11 @@ def create_league(
     db.commit()
     db.refresh(db_league)
 
-    # Create entry for the league creator
+    # Create entry for the league creator with PENDING payment
     creator_entry = Entry(
         user_id=current_user.id,
         league_id=db_league.id,
-        payment_status=PaymentStatus.PAID
+        payment_status=PaymentStatus.PENDING
     )
     db.add(creator_entry)
 
@@ -56,8 +57,20 @@ def create_league(
     leaderboard = Leaderboard(league_id=db_league.id)
     db.add(leaderboard)
     db.commit()
+    db.refresh(creator_entry)
 
-    return db_league
+    # Create Stripe Checkout Session
+    checkout_url = create_checkout_session(
+        entry_id=creator_entry.id,
+        entry_fee=db_league.entry_fee,
+        league_name=db_league.name,
+        league_id=db_league.id,
+    )
+
+    return LeagueCreateResponse(
+        league=LeagueResponse.model_validate(db_league),
+        checkout_url=checkout_url,
+    )
 
 
 @router.get("", response_model=List[LeagueResponse])
@@ -91,7 +104,7 @@ def get_league(league_id: int, db: Session = Depends(get_db)):
     return league
 
 
-@router.post("/join", response_model=EntryResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/join", response_model=LeagueJoinResponse, status_code=status.HTTP_201_CREATED)
 def join_league(
     join_data: LeagueJoin,
     current_user: User = Depends(get_current_user),
@@ -132,17 +145,28 @@ def join_league(
             detail="League is full"
         )
 
-    # Create entry
+    # Create entry with PENDING payment
     entry = Entry(
         user_id=current_user.id,
         league_id=league.id,
-        payment_status=PaymentStatus.PAID
+        payment_status=PaymentStatus.PENDING
     )
     db.add(entry)
     db.commit()
     db.refresh(entry)
 
-    return entry
+    # Create Stripe Checkout Session
+    checkout_url = create_checkout_session(
+        entry_id=entry.id,
+        entry_fee=league.entry_fee,
+        league_name=league.name,
+        league_id=league.id,
+    )
+
+    return LeagueJoinResponse(
+        entry=EntryResponse.model_validate(entry),
+        checkout_url=checkout_url,
+    )
 
 
 @router.get("/{league_id}/entries", response_model=List[EntryResponse])

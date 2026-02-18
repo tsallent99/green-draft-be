@@ -30,9 +30,8 @@ def get_leaderboard(league_id: int, db: Session = Depends(get_db)):
     # Get all entries for this league
     entries = db.query(Entry).filter(Entry.league_id == league_id).all()
 
-    # Calculate prizes
-    num_entries = len(entries)
-    leaderboard.calculate_prizes(num_entries, league.entry_fee)
+    # Calculate prizes based on actual amounts received
+    leaderboard.calculate_prizes(entries)
 
     # Sort entries by score (descending)
     sorted_entries = sorted(entries, key=lambda e: e.total_score, reverse=True)
@@ -112,9 +111,8 @@ def refresh_leaderboard(league_id: int, db: Session = Depends(get_db)):
     # Get all entries
     entries = db.query(Entry).filter(Entry.league_id == league_id).all()
 
-    # Recalculate prizes
-    num_entries = len(entries)
-    leaderboard.calculate_prizes(num_entries, league.entry_fee)
+    # Recalculate prizes based on actual amounts received
+    leaderboard.calculate_prizes(entries)
 
     # Sort entries by score
     sorted_entries = sorted(entries, key=lambda e: e.total_score, reverse=True)

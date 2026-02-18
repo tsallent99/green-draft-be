@@ -18,6 +18,7 @@ class Entry(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     league_id = Column(Integer, ForeignKey("leagues.id"), nullable=False)
     payment_status = Column(Enum(PaymentStatus), default=PaymentStatus.PENDING)
+    amount_paid = Column(Float, default=0.0)  # Actual amount received after Stripe fees
     total_score = Column(Float, default=0.0)  # Accumulated points
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

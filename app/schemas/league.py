@@ -36,3 +36,18 @@ class LeagueResponse(LeagueBase):
 
 class LeagueJoin(BaseModel):
     invitation_code: str
+
+
+class LeagueCreateResponse(BaseModel):
+    league: LeagueResponse
+    checkout_url: str
+
+
+class LeagueJoinResponse(BaseModel):
+    entry: "EntryResponse"
+    checkout_url: str
+
+
+from app.schemas.entry import EntryResponse  # noqa: E402
+
+LeagueJoinResponse.model_rebuild()

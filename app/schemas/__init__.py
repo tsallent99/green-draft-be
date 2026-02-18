@@ -2,7 +2,7 @@ from app.schemas.user import UserCreate, UserUpdate, UserResponse, UserLogin
 from app.schemas.tournament import TournamentCreate, TournamentUpdate, TournamentResponse
 from app.schemas.player import PlayerCreate, PlayerUpdate, PlayerResponse
 from app.schemas.player_odds import PlayerOddsCreate, PlayerOddsUpdate, PlayerOddsResponse, PlayerWithOdds
-from app.schemas.league import LeagueCreate, LeagueUpdate, LeagueResponse, LeagueJoin
+from app.schemas.league import LeagueCreate, LeagueUpdate, LeagueResponse, LeagueJoin, LeagueCreateResponse, LeagueJoinResponse
 from app.schemas.entry import EntryCreate, EntryUpdate, EntryResponse
 from app.schemas.team import TeamCreate, TeamUpdate, TeamResponse, TeamPickResponse
 from app.schemas.leaderboard import LeaderboardResponse, LeaderboardDetailed, RankingEntry
@@ -31,6 +31,8 @@ __all__ = [
     "LeagueUpdate",
     "LeagueResponse",
     "LeagueJoin",
+    "LeagueCreateResponse",
+    "LeagueJoinResponse",
     # Entry
     "EntryCreate",
     "EntryUpdate",
